@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: cicdApp
+
+server:
+  port: 80
