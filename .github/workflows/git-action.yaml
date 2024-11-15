@@ -15,6 +15,17 @@ permissions:
   id-token: write
   contents: read
 
+# 전역 환경 변수 설정
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: cicd
+
+#  ECS_SERVICE: itstudyservice2
+#  ECS_CLUSTER: deploytest
+#  ECS_TASK_DEFINITION: ./task-definition.json
+#  CONTAINER_NAME: itstudy1
+
+
 jobs:
   build-docker-image:
     #ubuntu 환경에서 수행
@@ -45,20 +56,23 @@ jobs:
           role-session-name: sampleSessionName
           aws-region: ap-northeast-2
 
+      #ECR에 로그인
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
 
-      # DockerHub 로그인 단계
-      - name: Login to DockerHub
-        uses: docker/login-action@v1  # DockerHub 로그인 액션 사용
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}  # GitHub Secrets에 저장된 DockerHub 사용자 이름 사용
-          password: ${{secrets.DOCKERHUB_TOKEN}}  # GitHub Secrets에 저장된 DockerHub 비밀번호(토큰) 사용
 
-      # Docker 이미지 빌드 및 DockerHub로 푸시
-      - name: build and release to DockerHub
+        #이미지를 빌드하고 ECR에 push
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
-          NAME: ${{secrets.DOCKERHUB_USERNAME}}  # GitHub Secret 에서 가져온 DockerHub 사용자 이름 설정
-          REPO: ${{secrets.DOCKERHUB_REPO}}  # Docker 이미지의 이름(리포지토리) 설정
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REPO .
-          docker tag $REPO:latest $NAME/$REPO:latest
-          docker push $NAME/$REPO:latest
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+
+
+
