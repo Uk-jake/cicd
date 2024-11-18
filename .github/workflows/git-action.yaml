@@ -49,12 +49,12 @@ jobs:
           arguments: clean bootJar
 
       # AWS Login
-#      - name: AWS ECR Credential
-#        uses: aws-actions/configure-aws-credentials@v4
-#        with:
-#          role-to-assume: arn:aws:iam::058264293778:role/github_ECR
-#          role-session-name: sampleSessionName
-#          aws-region: ap-northeast-2
+      - name: AWS ECR Credential
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::058264293778:role/github_ECR
+          role-session-name: sampleSessionName
+          aws-region: ap-northeast-2
 #
 #      #ECR에 로그인
 #      - name: Login to Amazon ECR
