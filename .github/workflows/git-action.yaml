@@ -44,9 +44,9 @@ jobs:
 
       # Java Build
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@2.6.0
+        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
-          arguments: build
+          arguments: clean bootJar
 
       # AWS Login
       - name: AWS ECR Credential
