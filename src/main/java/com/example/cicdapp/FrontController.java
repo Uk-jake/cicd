@@ -13,7 +13,7 @@ public class FrontController {
     public Map<String, Object> index(){
         Map<String, Object> model = new HashMap<>();
 
-        model.put("result", "success");
+        model.put("result", "CICD Success");
 
         return model;
     }
