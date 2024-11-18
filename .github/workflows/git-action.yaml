@@ -22,11 +22,11 @@ env:
   AWS_REGION: ap-northeast-2  # AWS 리전 설정
   ECR_REPOSITORY: cicd        # Amazon ECR 리포지토리 이름
 
-#  ECS 관련 설정은 주석 처리됨
-#  ECS_SERVICE: itstudyservice2
-#  ECS_CLUSTER: deploytest
-#  ECS_TASK_DEFINITION: ./task-definition.json
-#  CONTAINER_NAME: itstudy1
+  ECS_SERVICE: CICD-TestService
+  ECS_CLUSTER: CICDCluster-1118
+  ECS_TASK_DEFINITION: ./task-definition.json
+  CONTAINER_NAME: cicd
+
 
 jobs:
   # Docker 이미지를 빌드하고 푸시하는 작업 정의
@@ -79,4 +79,21 @@ jobs:
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
           # 이미지 정보를 출력 (로그 용도)
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@c804dfbdd57f713b6c079302a4c01db7017a36fc
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
 
